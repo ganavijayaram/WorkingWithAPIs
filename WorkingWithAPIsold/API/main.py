@@ -50,3 +50,9 @@ def createPosts(post: Post):
     myPosts.append(newPost)
     return {"data": newPost}
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
+
+#Giving path parameter
+@app.get("/posts/{id}")
+def getPost(id):
+    print(id)
+    return {"Get Post with id": f"id is {id}"}
