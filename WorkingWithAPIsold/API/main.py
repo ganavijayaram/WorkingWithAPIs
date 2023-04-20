@@ -51,8 +51,16 @@ def createPosts(post: Post):
     return {"data": newPost}
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
 
+def findPost(id):
+    for p in myPosts:
+        if p["id"] == int(id):
+            return p
+        else:
+            print(p["id"])
+
 #Giving path parameter
 @app.get("/posts/{id}")
 def getPost(id):
     print(id)
-    return {"Get Post with id": f"id is {id}"}
+    print(findPost(id))
+    return {"Get Post with id": findPost(id)}
