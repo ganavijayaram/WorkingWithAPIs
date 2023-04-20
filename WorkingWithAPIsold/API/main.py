@@ -19,7 +19,8 @@ class Post(BaseModel):
     rating: Optional[int] = None
     published: bool = True 
 
-
+#Using in built memory for time being
+myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Title 2", "content": "Content 2", "id": 2}]
 
 #routing/path operations
 
@@ -32,14 +33,14 @@ def root():
 
 @app.get("/posts")
 def getPosts():
-    return {"Returning the Posts"}
+    return {"data": myPosts}
 
 
 #Here when the client will send data, the data is taken by the API
 #and API will send it to pur web app. so we are extracting that paylaod and returning 
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
-@app.post("/createposts")
+@app.post("/posts")
 def createPosts(post: Post):
     print(post)
     #converting to dict
