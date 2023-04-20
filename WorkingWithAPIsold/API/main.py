@@ -5,6 +5,7 @@ from fastapi.params import Body
 from pydantic import BaseModel
 #For creating optional parameters for Post data
 from typing import Optional
+from random import randrange
 
 #Creating instance of the class FastAPI
 app = FastAPI()
@@ -44,6 +45,8 @@ def getPosts():
 def createPosts(post: Post):
     print(post)
     #converting to dict
-    print(post.dict())
-    return {"data": "new post"}
+    newPost = post.dict()
+    newPost["id"] = randrange(0, 1000000)
+    myPosts.append(newPost)
+    return {"data": newPost}
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
