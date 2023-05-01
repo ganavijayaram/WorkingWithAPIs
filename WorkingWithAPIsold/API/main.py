@@ -6,7 +6,7 @@ from pydantic import BaseModel
 #For creating optional parameters for Post data
 from typing import Optional
 from random import randrange
-from fastapi import Response
+from fastapi import Response, status
 #Creating instance of the class FastAPI
 app = FastAPI()
 
