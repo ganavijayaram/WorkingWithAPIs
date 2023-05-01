@@ -41,7 +41,7 @@ def getPosts():
 #and API will send it to pur web app. so we are extracting that paylaod and returning 
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
-@app.post("/posts")
+@app.post("/posts", status_code=status.HTTP_201_CREATED)
 def createPosts(post: Post):
     print(post)
     #converting to dict
