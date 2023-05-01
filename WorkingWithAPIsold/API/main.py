@@ -6,7 +6,7 @@ from pydantic import BaseModel
 #For creating optional parameters for Post data
 from typing import Optional
 from random import randrange
-from fastapi import Response, status
+from fastapi import Response, status, HTTPException
 #Creating instance of the class FastAPI
 app = FastAPI()
 
@@ -63,6 +63,7 @@ def getPost(id: int, response: Response):
     print(id)
     singlePost = findPost(id)
     if not singlePost:
-        response.status_code = 404
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message": f"The post requested with id {id} does not exist"}
     return {"Get Post with id": findPost(id)}
 
