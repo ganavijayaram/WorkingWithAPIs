@@ -67,3 +67,17 @@ def getPost(id: int):
          detail = f"The post requested with id {id} does not exist")
     return {"Get Post with id": findPost(id)}
 
+def findPostIndex(id):
+    for i, p in enumerate(myPosts):
+        if(p["id"] == id):
+            return i
+
+@app.delete("/posts/{id}", status_code = status.HTTP_204_NO_CONTENT)
+def deletePost(id: int):
+    print("POSSTSS ", myPosts)
+    index = findPostIndex(id)
+    if index is not None:
+        myPosts.pop(index)
+        return Response(status_code = status.HTTP_204_NO_CONTENT)
+    raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
+    
