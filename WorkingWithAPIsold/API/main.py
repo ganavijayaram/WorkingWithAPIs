@@ -81,3 +81,17 @@ def deletePost(id: int):
         return Response(status_code = status.HTTP_204_NO_CONTENT)
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
     
+
+@app.put("/posts/{id}", status_code = status.HTTP_200_OK)
+def updatePost(id: int, post: Post):
+    index = findPostIndex(id)
+    print("BEFORE UDPATING POSTSS ", myPosts)
+    if index is not None:
+        dicPost = post.dict()
+        dicPost["id"] = id
+        myPosts[index] = dicPost
+        print("AFTER UDPATING POSTSS ", myPosts)
+        return {"Updates Post": dicPost}
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+         detail = f"Post with id {id} Cannot be updated with new content")
