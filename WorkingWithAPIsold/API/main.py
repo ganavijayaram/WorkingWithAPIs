@@ -59,11 +59,11 @@ def findPost(id):
 #Giving path parameter
 @app.get("/posts/{id}")
 #Validation provided by the FastAPI
-def getPost(id: int, response: Response):
+def getPost(id: int):
     print(id)
     singlePost = findPost(id)
     if not singlePost:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"message": f"The post requested with id {id} does not exist"}
+        raise HTTPException(status.HTTP_404_NOT_FOUND,
+         detail = f"The post requested with id {id} does not exist")
     return {"Get Post with id": findPost(id)}
 
