@@ -11,7 +11,8 @@ from fastapi import Response, status, HTTPException
 import psycopg2
 #To get the values from database in the form of dictionary
 from psycopg2.extras import RealDictCursor
-
+#importing time to give a break before connecting to DB again
+import time
 
 #Creating instance of the class FastAPI
 app = FastAPI()
@@ -27,15 +28,18 @@ class Post(BaseModel):
     rating: Optional[int] = None
     published: bool = True 
 
-try:
-    #Connecting to the PostgreSQL
-    conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-    user = "postgres", password = "enter your password", cursor_factory=RealDictCursor)
-    #Creating Cursor
-    cur = conn.cursor()
-    print("Database Connection Successful!")
-except Exception as err:
-    print("Database connection was not successful!")
+while True:
+    try:
+        #Connecting to the PostgreSQL
+        conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
+        user = "postgres", password = "enter password", cursor_factory=RealDictCursor)
+        #Creating Cursor
+        cur = conn.cursor()
+        print("Database Connection Successful!")
+        break
+    except Exception as err:
+        print("Database connection was not successful!")
+        time.sleep(2)
 #Using in built memory for time being
 myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Title 2", "content": "Content 2", "id": 2}]
 
