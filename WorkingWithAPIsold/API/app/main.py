@@ -32,9 +32,9 @@ while True:
     try:
         #Connecting to the PostgreSQL
         conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-        user = "postgres", password = "enter password", cursor_factory=RealDictCursor)
+        user = "postgres", password = "", cursor_factory=RealDictCursor)
         #Creating Cursor
-        cur = conn.cursor()
+        cursor = conn.cursor()
         print("Database Connection Successful!")
         break
     except Exception as err:
@@ -54,7 +54,10 @@ def root():
 
 @app.get("/posts")
 def getPosts():
-    return {"data": myPosts}
+    cursor.execute("""SELECT * FROM POSTS""")
+    allPosts = cursor.fetchall()
+    print("Posts = ", allPosts)
+    return {"data": allPosts}
 
 
 #Here when the client will send data, the data is taken by the API
