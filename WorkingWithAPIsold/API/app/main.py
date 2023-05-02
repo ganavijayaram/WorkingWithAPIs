@@ -83,12 +83,14 @@ def findPost(id):
 @app.get("/posts/{id}")
 #Validation provided by the FastAPI
 def getPost(id: int):
-    print(id)
-    singlePost = findPost(id)
+    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
+    singlePost = cursor.fetchone()
     if not singlePost:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"The post requested with id {id} does not exist")
-    return {"Get Post with id": findPost(id)}
+    return {"Get Post with id": singlePost}
+
+    
 
 def findPostIndex(id):
     for i, p in enumerate(myPosts):
