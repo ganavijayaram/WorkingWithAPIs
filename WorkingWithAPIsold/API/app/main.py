@@ -7,8 +7,15 @@ from pydantic import BaseModel
 from typing import Optional
 from random import randrange
 from fastapi import Response, status, HTTPException
+#Importing all the libraries related to psycopg2
+import psycopg2
+#To get the values from database in the form of dictionary
+from psycopg2.extras import RealDictCursor
+
+
 #Creating instance of the class FastAPI
 app = FastAPI()
+
 
 
 #Creating schema for the Post request
@@ -20,6 +27,15 @@ class Post(BaseModel):
     rating: Optional[int] = None
     published: bool = True 
 
+try:
+    #Connecting to the PostgreSQL
+    conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
+    user = "postgres", password = "enter your password", cursor_factory=RealDictCursor)
+    #Creating Cursor
+    cur = conn.cursor()
+    print("Database Connection Successful!")
+except Exception as err:
+    print("Database connection was not successful!")
 #Using in built memory for time being
 myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Title 2", "content": "Content 2", "id": 2}]
 
