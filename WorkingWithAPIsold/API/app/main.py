@@ -66,11 +66,11 @@ def getPosts():
  
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def createPosts(post: Post):
-    print(post)
-    #converting to dict
-    newPost = post.dict()
-    newPost["id"] = randrange(0, 1000000)
-    myPosts.append(newPost)
+    cursor.execute(""" INSERT INTO posts (title, content, 
+                    published) VALUES (%s, %s, %s) RETURNING *""", 
+                   (post.title, post.content, post.published))
+    newPost = cursor.fetchone()
+    conn.commit()
     return {"data": newPost}
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
 
