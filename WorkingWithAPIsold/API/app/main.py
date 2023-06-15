@@ -62,10 +62,10 @@ def root( db: Session = Depends(get_db)):
     return {"data": posts}
 
 @app.get("/posts")
-def getPosts():
-    cursor.execute("""SELECT * FROM POSTS""")
-    allPosts = cursor.fetchall()
-    print("Posts = ", allPosts)
+def getPosts(db: Session = Depends(get_db)):
+    #cursor.execute("""SELECT * FROM POSTS""")
+    #allPosts = cursor.fetchall()
+    allPosts = db.query(models.Posts).all()
     return {"data": allPosts}
 
 
@@ -74,12 +74,17 @@ def getPosts():
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def createPosts(post: Post):
-    cursor.execute(""" INSERT INTO posts (title, content, 
-                    published) VALUES (%s, %s, %s) RETURNING *""", 
-                   (post.title, post.content, post.published))
-    newPost = cursor.fetchone()
-    conn.commit()
+def createPosts(post: Post, db: Session = Depends(get_db)):
+    # cursor.execute(""" INSERT INTO posts (title, content, 
+    #                 published) VALUES (%s, %s, %s) RETURNING *""", 
+    #                (post.title, post.content, post.published))
+    # newPost = cursor.fetchone()
+    # conn.commit()
+    newPost = models.Posts(title = post.title, content = post.content,
+                           published = post.published)
+    db.add(newPost)
+    db.commit()
+    db.refresh(newPost)
     return {"data": newPost}
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
 
