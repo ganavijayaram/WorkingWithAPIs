@@ -29,14 +29,13 @@ class Post(BaseModel):
     title: str
     content: str
     #setting default value, in case the value is not provided
-    rating: Optional[int] = None
     published: bool = True 
 
 while True:
     try:
         #Connecting to the PostgreSQL
         conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-        user = "postgres", password = "", cursor_factory=RealDictCursor)
+        user = "postgres", password = "IAMBLESSEDthankyou1!", cursor_factory=RealDictCursor)
         #Creating Cursor
         cursor = conn.cursor()
         print("Database Connection Successful!")
@@ -80,8 +79,9 @@ def createPosts(post: Post, db: Session = Depends(get_db)):
     #                (post.title, post.content, post.published))
     # newPost = cursor.fetchone()
     # conn.commit()
-    newPost = models.Posts(title = post.title, content = post.content,
-                           published = post.published)
+    #newPost = models.Posts(title = post.title, content = post.content,
+                           #published = post.published)
+    newPost = models.Post(**post.dict())
     db.add(newPost)
     db.commit()
     db.refresh(newPost)
