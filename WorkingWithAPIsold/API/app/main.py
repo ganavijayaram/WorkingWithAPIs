@@ -36,7 +36,7 @@ while True:
     try:
         #Connecting to the PostgreSQL
         conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-        user = "postgres", password = "IAMBLESSEDthankyou1!", cursor_factory=RealDictCursor)
+        user = "postgres", password = "", cursor_factory=RealDictCursor)
         #Creating Cursor
         cursor = conn.cursor()
         print("Database Connection Successful!")
@@ -58,7 +58,8 @@ def root():
 
 @app.get("/testsqlalchemy")
 def root( db: Session = Depends(get_db)):
-    return {"message": "SQLAlchemy working"}
+    posts = db.query(models.Posts).all()
+    return {"data": posts}
 
 @app.get("/posts")
 def getPosts():
