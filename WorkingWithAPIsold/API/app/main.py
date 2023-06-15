@@ -14,21 +14,13 @@ from psycopg2.extras import RealDictCursor
 #importing time to give a break before connecting to DB again
 import time
 from . import models
-from .database import engine, SessionLocal
+from .database import engine, get_db
 from sqlalchemy.orm import Session
 
 models.Base.metadata.create_all(bind=engine)
 
 #Creating instance of the class FastAPI
 app = FastAPI()
-
-# Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 #Creating schema for the Post request
@@ -44,7 +36,7 @@ while True:
     try:
         #Connecting to the PostgreSQL
         conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-        user = "postgres", password = "", cursor_factory=RealDictCursor)
+        user = "postgres", password = "IAMBLESSEDthankyou1!", cursor_factory=RealDictCursor)
         #Creating Cursor
         cursor = conn.cursor()
         print("Database Connection Successful!")
