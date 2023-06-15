@@ -6,17 +6,29 @@ from pydantic import BaseModel
 #For creating optional parameters for Post data
 from typing import Optional
 from random import randrange
-from fastapi import Response, status, HTTPException
+from fastapi import Response, status, HTTPException, Depends
 #Importing all the libraries related to psycopg2
 import psycopg2
 #To get the values from database in the form of dictionary
 from psycopg2.extras import RealDictCursor
 #importing time to give a break before connecting to DB again
 import time
+from . import models
+from .database import engine, SessionLocal
+from sqlalchemy.orm import Session
+
+models.Base.metadata.create_all(bind=engine)
 
 #Creating instance of the class FastAPI
 app = FastAPI()
 
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 #Creating schema for the Post request
@@ -51,6 +63,10 @@ myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Ti
 def root():
     return {"message": "Ganavi got an internship!!"}
 
+
+@app.get("/testsqlalchemy")
+def root( db: Session = Depends(get_db)):
+    return {"message": "SQLAlchemy working"}
 
 @app.get("/posts")
 def getPosts():
@@ -99,24 +115,25 @@ def findPostIndex(id):
 
 @app.delete("/posts/{id}", status_code = status.HTTP_204_NO_CONTENT)
 def deletePost(id: int):
-    print("POSSTSS ", myPosts)
-    index = findPostIndex(id)
-    if index is not None:
-        myPosts.pop(index)
+    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
+                   (str(id)))
+    deletedPost = cursor.fetchone()
+    if deletedPost is not None:
+        conn.commit()
         return Response(status_code = status.HTTP_204_NO_CONTENT)
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
     
 
 @app.put("/posts/{id}", status_code = status.HTTP_200_OK)
 def updatePost(id: int, post: Post):
-    index = findPostIndex(id)
-    print("BEFORE UDPATING POSTSS ", myPosts)
-    if index is not None:
-        dicPost = post.dict()
-        dicPost["id"] = id
-        myPosts[index] = dicPost
-        print("AFTER UDPATING POSTSS ", myPosts)
-        return {"Updates Post": dicPost}
+    cursor.execute(""" UPDATE posts SET title  = %s,
+      content  = %s, published = %s WHERE id = %s RETURNING *""",
+        (post.title, post.content, post.published, str(id)))
+    updatedPost = cursor.fetchone()
+    conn.commit()
+    print("BEFORE UDPATING posts SET title = %s ", myPosts)
+    if updatedPost is not None:
+        return {"Updates Post": updatedPost}
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"Post with id {id} Cannot be updated with new content")
