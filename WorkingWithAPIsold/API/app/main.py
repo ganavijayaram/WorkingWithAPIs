@@ -35,7 +35,7 @@ while True:
     try:
         #Connecting to the PostgreSQL
         conn = psycopg2.connect(host = "localhost", database = "WorkingWithFastAPI",
-        user = "postgres", password = "IAMBLESSEDthankyou1!", cursor_factory=RealDictCursor)
+        user = "postgres", password = "", cursor_factory=RealDictCursor)
         #Creating Cursor
         cursor = conn.cursor()
         print("Database Connection Successful!")
@@ -96,9 +96,10 @@ def findPost(id):
 #Giving path parameter
 @app.get("/posts/{id}")
 #Validation provided by the FastAPI
-def getPost(id: int):
-    cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
-    singlePost = cursor.fetchone()
+def getPost(id: int, db: Session = Depends(get_db)):
+    # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
+    # singlePost = cursor.fetchone()
+    singlePost = db.query(models.Post).filter(models.Post.id == id).first()
     if not singlePost:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"The post requested with id {id} does not exist")
@@ -112,12 +113,15 @@ def findPostIndex(id):
             return i
 
 @app.delete("/posts/{id}", status_code = status.HTTP_204_NO_CONTENT)
-def deletePost(id: int):
-    cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
-                   (str(id)))
-    deletedPost = cursor.fetchone()
-    if deletedPost is not None:
-        conn.commit()
+def deletePost(id: int, db: Session = Depends(get_db)):
+    # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
+    #                (str(id)))
+    # deletedPost = cursor.fetchone()
+    toDeletePost = db.query(models.Post).filter(models.Post.id == id)
+    if toDeletePost.first() is not None:
+        #conn.commit()
+        toDeletePost.delete(synchronize_session = False)
+        db.commit()
         return Response(status_code = status.HTTP_204_NO_CONTENT)
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
     
