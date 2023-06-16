@@ -127,15 +127,22 @@ def deletePost(id: int, db: Session = Depends(get_db)):
     
 
 @app.put("/posts/{id}", status_code = status.HTTP_200_OK)
-def updatePost(id: int, post: Post):
-    cursor.execute(""" UPDATE posts SET title  = %s,
-      content  = %s, published = %s WHERE id = %s RETURNING *""",
-        (post.title, post.content, post.published, str(id)))
-    updatedPost = cursor.fetchone()
-    conn.commit()
-    print("BEFORE UDPATING posts SET title = %s ", myPosts)
-    if updatedPost is not None:
-        return {"Updates Post": updatedPost}
+def updatePost(id: int, post: Post, db: Session = Depends(get_db)):
+    # cursor.execute(""" UPDATE posts SET title  = %s,
+    #   content  = %s, published = %s WHERE id = %s RETURNING *""",
+    #     (post.title, post.content, post.published, str(id)))
+    # updatedPost = cursor.fetchone()
+    # conn.commit()
+    updatePost = db.query(models.Post).filter(models.Post.id == id)
+    if updatePost.first() is not None:
+        #Manually entering the values
+        #updatePost.update({'title': "Updating Title", 'content': "Updating Content"}, 
+                          #synchronize_session=False)
+        #Getting the values from the user
+        updatePost.update(post.dict(), 
+                          synchronize_session=False)
+        db.commit()
+        return {"Updates Post": updatePost.first()}
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"Post with id {id} Cannot be updated with new content")
