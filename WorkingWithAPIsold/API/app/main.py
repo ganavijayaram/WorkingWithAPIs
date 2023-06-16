@@ -13,7 +13,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 #importing time to give a break before connecting to DB again
 import time
-from . import models
+from . import models, schemas
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
@@ -23,13 +23,6 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-#Creating schema for the Post request
-class Post(BaseModel):
-    #title and content has to be present and has to be string datatype
-    title: str
-    content: str
-    #setting default value, in case the value is not provided
-    published: bool = True 
 
 while True:
     try:
@@ -54,12 +47,6 @@ myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Ti
 def root():
     return {"message": "Ganavi got an internship!!"}
 
-
-@app.get("/testsqlalchemy")
-def root( db: Session = Depends(get_db)):
-    posts = db.query(models.Posts).all()
-    return {"data": posts}
-
 @app.get("/posts")
 def getPosts(db: Session = Depends(get_db)):
     #cursor.execute("""SELECT * FROM POSTS""")
@@ -73,7 +60,7 @@ def getPosts(db: Session = Depends(get_db)):
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def createPosts(post: Post, db: Session = Depends(get_db)):
+def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" INSERT INTO posts (title, content, 
     #                 published) VALUES (%s, %s, %s) RETURNING *""", 
     #                (post.title, post.content, post.published))
@@ -127,7 +114,7 @@ def deletePost(id: int, db: Session = Depends(get_db)):
     
 
 @app.put("/posts/{id}", status_code = status.HTTP_200_OK)
-def updatePost(id: int, post: Post, db: Session = Depends(get_db)):
+def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" UPDATE posts SET title  = %s,
     #   content  = %s, published = %s WHERE id = %s RETURNING *""",
     #     (post.title, post.content, post.published, str(id)))
