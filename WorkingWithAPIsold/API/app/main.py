@@ -4,7 +4,7 @@ from fastapi.params import Body
 #For creating schema for the Post request
 from pydantic import BaseModel
 #For creating optional parameters for Post data
-from typing import Optional
+from typing import Optional, List
 from random import randrange
 from fastapi import Response, status, HTTPException, Depends
 #Importing all the libraries related to psycopg2
@@ -47,7 +47,7 @@ myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Ti
 def root():
     return {"message": "Ganavi got an internship!!"}
 
-@app.get("/posts")
+@app.get("/posts", response_model = List[schemas.Post])
 def getPosts(db: Session = Depends(get_db)):
     #cursor.execute("""SELECT * FROM POSTS""")
     #allPosts = cursor.fetchall()
@@ -59,7 +59,8 @@ def getPosts(db: Session = Depends(get_db)):
 #and API will send it to pur web app. so we are extracting that paylaod and returning 
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
-@app.post("/posts", status_code=status.HTTP_201_CREATED)
+@app.post("/posts", status_code=status.HTTP_201_CREATED,
+           response_model = schemas.Post)
 def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" INSERT INTO posts (title, content, 
     #                 published) VALUES (%s, %s, %s) RETURNING *""", 
@@ -81,7 +82,7 @@ def findPost(id):
             return p
        
 #Giving path parameter
-@app.get("/posts/{id}")
+@app.get("/posts/{id}", response_model = schemas.Post)
 #Validation provided by the FastAPI
 def getPost(id: int, db: Session = Depends(get_db)):
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
@@ -113,7 +114,7 @@ def deletePost(id: int, db: Session = Depends(get_db)):
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
     
 
-@app.put("/posts/{id}", status_code = status.HTTP_200_OK)
+@app.put("/posts/{id}", status_code = status.HTTP_200_OK, response_model = schemas.Post)
 def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" UPDATE posts SET title  = %s,
     #   content  = %s, published = %s WHERE id = %s RETURNING *""",
