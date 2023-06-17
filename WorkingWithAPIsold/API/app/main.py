@@ -13,11 +13,14 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 #importing time to give a break before connecting to DB again
 import time
-from . import models, schemas
+from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
+
 models.Base.metadata.create_all(bind=engine)
+
+
 
 #Creating instance of the class FastAPI
 app = FastAPI()
@@ -139,6 +142,9 @@ def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db))
 @app.post("/users", status_code = status.HTTP_201_CREATED, 
           response_model = schemas.UserOut)
 def createUsers(user: schemas.UserCreate, db: Session  = Depends(get_db)):
+
+    user.password = utils.hash(user.password)
+
     newUser = models.User(**user.dict())
     db.add(newUser)
     db.commit()
