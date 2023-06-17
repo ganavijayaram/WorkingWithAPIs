@@ -51,8 +51,8 @@ def root():
 def getPosts(db: Session = Depends(get_db)):
     #cursor.execute("""SELECT * FROM POSTS""")
     #allPosts = cursor.fetchall()
-    allPosts = db.query(models.Posts).all()
-    return {"data": allPosts}
+    allPosts = db.query(models.Post).all()
+    return allPosts
 
 
 #Here when the client will send data, the data is taken by the API
@@ -72,7 +72,7 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
     db.add(newPost)
     db.commit()
     db.refresh(newPost)
-    return {"data": newPost}
+    return newPost
     #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
 
 def findPost(id):
@@ -90,7 +90,7 @@ def getPost(id: int, db: Session = Depends(get_db)):
     if not singlePost:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"The post requested with id {id} does not exist")
-    return {"Get Post with id": singlePost}
+    return singlePost
 
     
 
@@ -129,7 +129,7 @@ def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db))
         updatePost.update(post.dict(), 
                           synchronize_session=False)
         db.commit()
-        return {"Updates Post": updatePost.first()}
+        return updatePost.first()
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"Post with id {id} Cannot be updated with new content")
