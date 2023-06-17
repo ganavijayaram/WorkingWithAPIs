@@ -134,3 +134,13 @@ def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db))
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"Post with id {id} Cannot be updated with new content")
+    
+
+@app.post("/users", status_code = status.HTTP_201_CREATED)
+def createUsers(user: schemas.UserCreate, db: Session  = Depends(get_db)):
+    newUser = models.User(**user.dict())
+    db.add(newUser)
+    db.commit()
+    #This is to return the value to the suer
+    db.refresh(newUser)
+    return newUser
