@@ -136,7 +136,8 @@ def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db))
          detail = f"Post with id {id} Cannot be updated with new content")
     
 
-@app.post("/users", status_code = status.HTTP_201_CREATED)
+@app.post("/users", status_code = status.HTTP_201_CREATED, 
+          response_model = schemas.UserOut)
 def createUsers(user: schemas.UserCreate, db: Session  = Depends(get_db)):
     newUser = models.User(**user.dict())
     db.add(newUser)
