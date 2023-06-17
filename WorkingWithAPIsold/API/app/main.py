@@ -17,6 +17,9 @@ from . import models, schemas, utils
 from .database import engine, get_db
 from sqlalchemy.orm import Session
 
+#importing the routes from routers file
+from .routers import post, user
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -42,6 +45,10 @@ while True:
 #Using in built memory for time being
 myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Title 2", "content": "Content 2", "id": 2}]
 
+#Including the routes which are in different files to be refresenced when called
+app.include_router(post.router)
+app.include_router(user.router)
+
 #routing/path operations
 
 #This is a decorator, inside get(), we give the path so that root() os executed
@@ -50,114 +57,3 @@ myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Ti
 def root():
     return {"message": "Ganavi got an internship!!"}
 
-@app.get("/posts", response_model = List[schemas.Post])
-def getPosts(db: Session = Depends(get_db)):
-    #cursor.execute("""SELECT * FROM POSTS""")
-    #allPosts = cursor.fetchall()
-    allPosts = db.query(models.Post).all()
-    return allPosts
-
-
-#Here when the client will send data, the data is taken by the API
-#and API will send it to pur web app. so we are extracting that paylaod and returning 
-#the same data to the user(we can return anything, but we are returning the data which user used)
- 
-@app.post("/posts", status_code=status.HTTP_201_CREATED,
-           response_model = schemas.Post)
-def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
-    # cursor.execute(""" INSERT INTO posts (title, content, 
-    #                 published) VALUES (%s, %s, %s) RETURNING *""", 
-    #                (post.title, post.content, post.published))
-    # newPost = cursor.fetchone()
-    # conn.commit()
-    #newPost = models.Posts(title = post.title, content = post.content,
-                           #published = post.published)
-    newPost = models.Post(**post.dict())
-    db.add(newPost)
-    db.commit()
-    db.refresh(newPost)
-    return newPost
-    #return {"newpost": f"title: {payload['title']} content: {payload['content']}"}
-
-def findPost(id):
-    for p in myPosts:
-        if p["id"] == int(id):
-            return p
-       
-#Giving path parameter
-@app.get("/posts/{id}", response_model = schemas.Post)
-#Validation provided by the FastAPI
-def getPost(id: int, db: Session = Depends(get_db)):
-    # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
-    # singlePost = cursor.fetchone()
-    singlePost = db.query(models.Post).filter(models.Post.id == id).first()
-    if not singlePost:
-        raise HTTPException(status.HTTP_404_NOT_FOUND,
-         detail = f"The post requested with id {id} does not exist")
-    return singlePost
-
-    
-
-def findPostIndex(id):
-    for i, p in enumerate(myPosts):
-        if(p["id"] == id):
-            return i
-
-@app.delete("/posts/{id}", status_code = status.HTTP_204_NO_CONTENT)
-def deletePost(id: int, db: Session = Depends(get_db)):
-    # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
-    #                (str(id)))
-    # deletedPost = cursor.fetchone()
-    toDeletePost = db.query(models.Post).filter(models.Post.id == id)
-    if toDeletePost.first() is not None:
-        #conn.commit()
-        toDeletePost.delete(synchronize_session = False)
-        db.commit()
-        return Response(status_code = status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
-    
-
-@app.put("/posts/{id}", status_code = status.HTTP_200_OK, response_model = schemas.Post)
-def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db)):
-    # cursor.execute(""" UPDATE posts SET title  = %s,
-    #   content  = %s, published = %s WHERE id = %s RETURNING *""",
-    #     (post.title, post.content, post.published, str(id)))
-    # updatedPost = cursor.fetchone()
-    # conn.commit()
-    updatePost = db.query(models.Post).filter(models.Post.id == id)
-    if updatePost.first() is not None:
-        #Manually entering the values
-        #updatePost.update({'title': "Updating Title", 'content': "Updating Content"}, 
-                          #synchronize_session=False)
-        #Getting the values from the user
-        updatePost.update(post.dict(), 
-                          synchronize_session=False)
-        db.commit()
-        return updatePost.first()
-    else:
-        raise HTTPException(status.HTTP_404_NOT_FOUND,
-         detail = f"Post with id {id} Cannot be updated with new content")
-    
-
-@app.post("/users", status_code = status.HTTP_201_CREATED, 
-          response_model = schemas.UserOut)
-def createUsers(user: schemas.UserCreate, db: Session  = Depends(get_db)):
-
-    user.password = utils.hash(user.password)
-
-    newUser = models.User(**user.dict())
-    db.add(newUser)
-    db.commit()
-    #This is to return the value to the suer
-    db.refresh(newUser)
-    return newUser
-
-
-@app.get("/users/{id}", status_code = status.HTTP_200_OK,
-          response_model = schemas.UserOut)
-def getUsers(id: int, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == id).first()
-    if not user:
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, 
-                            detail = f"User with id {id} not found")
-    return user
