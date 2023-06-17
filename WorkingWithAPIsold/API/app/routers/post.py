@@ -5,9 +5,11 @@ from sqlalchemy.orm import Session
 from typing import List
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix = "/posts", tags = ['Posts']
+)
 
-@router.get("/posts", response_model = List[schemas.Post])
+@router.get("/", response_model = List[schemas.Post])
 def getPosts(db: Session = Depends(get_db)):
     #cursor.execute("""SELECT * FROM POSTS""")
     #allPosts = cursor.fetchall()
@@ -19,7 +21,7 @@ def getPosts(db: Session = Depends(get_db)):
 #and API will send it to pur web app. so we are extracting that paylaod and returning 
 #the same data to the user(we can return anything, but we are returning the data which user used)
  
-@router.post("/posts", status_code=status.HTTP_201_CREATED,
+@router.post("/", status_code=status.HTTP_201_CREATED,
            response_model = schemas.Post)
 def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" INSERT INTO posts (title, content, 
@@ -39,7 +41,7 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db)):
 
        
 #Giving path parameter
-@router.get("/posts/{id}", response_model = schemas.Post)
+@router.get("/{id}", response_model = schemas.Post)
 #Validation provided by the FastAPI
 def getPost(id: int, db: Session = Depends(get_db)):
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
@@ -54,7 +56,7 @@ def getPost(id: int, db: Session = Depends(get_db)):
 
 
 
-@router.delete("/posts/{id}", status_code = status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code = status.HTTP_204_NO_CONTENT)
 def deletePost(id: int, db: Session = Depends(get_db)):
     # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
     #                (str(id)))
@@ -68,7 +70,7 @@ def deletePost(id: int, db: Session = Depends(get_db)):
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
     
 
-@router.put("/posts/{id}", status_code = status.HTTP_200_OK, response_model = schemas.Post)
+@router.put("/{id}", status_code = status.HTTP_200_OK, response_model = schemas.Post)
 def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db)):
     # cursor.execute(""" UPDATE posts SET title  = %s,
     #   content  = %s, published = %s WHERE id = %s RETURNING *""",
