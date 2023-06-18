@@ -67,10 +67,13 @@ def deletePost(id: int, db: Session = Depends(get_db),
     # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
     #                (str(id)))
     # deletedPost = cursor.fetchone()
-    toDeletePost = db.query(models.Post).filter(models.Post.id == id)
-    if toDeletePost.first() is not None:
+    toDeletePostQuery = db.query(models.Post).filter(models.Post.id == id)
+    if toDeletePostQuery.first() is not None:
         #conn.commit()
-        toDeletePost.delete(synchronize_session = False)
+        post = toDeletePostQuery.first()
+        if(post.owner_id != currentUser.id):
+            raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = f"Not authorised to delete the post!!")
+        toDeletePostQuery.delete(synchronize_session = False)
         db.commit()
         return Response(status_code = status.HTTP_204_NO_CONTENT)
     raise HTTPException(status.HTTP_404_NOT_FOUND, detail = f"Post with id {id} not found!")
@@ -84,16 +87,19 @@ def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db),
     #     (post.title, post.content, post.published, str(id)))
     # updatedPost = cursor.fetchone()
     # conn.commit()
-    updatePost = db.query(models.Post).filter(models.Post.id == id)
-    if updatePost.first() is not None:
+    updatePostQuery = db.query(models.Post).filter(models.Post.id == id)
+    if updatePostQuery.first() is not None:
         #Manually entering the values
         #updatePost.update({'title': "Updating Title", 'content': "Updating Content"}, 
                           #synchronize_session=False)
         #Getting the values from the user
-        updatePost.update(post.dict(), 
+        posts = updatePostQuery.first()
+        if(posts.owner_id != currentUser.id):
+            raise HTTPException(status_code = status.HTTP_403_FORBIDDEN, detail = f"Not authorised to udpate the post!!")
+        updatePostQuery.update(post.dict(), 
                           synchronize_session=False)
         db.commit()
-        return updatePost.first()
+        return updatePostQuery.first()
     else:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"Post with id {id} Cannot be updated with new content")
