@@ -11,7 +11,8 @@ router = APIRouter(
 )
 
 @router.get("/", response_model = List[schemas.Post])
-def getPosts(db: Session = Depends(get_db)):
+def getPosts(db: Session = Depends(get_db),
+                 userId: int = Depends(oauth2.get_current_user)):
     #cursor.execute("""SELECT * FROM POSTS""")
     #allPosts = cursor.fetchall()
     allPosts = db.query(models.Post).all()
@@ -46,7 +47,8 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db),
 #Giving path parameter
 @router.get("/{id}", response_model = schemas.Post)
 #Validation provided by the FastAPI
-def getPost(id: int, db: Session = Depends(get_db)):
+def getPost(id: int, db: Session = Depends(get_db), 
+                 userId: int = Depends(oauth2.get_current_user)):
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
     # singlePost = cursor.fetchone()
     singlePost = db.query(models.Post).filter(models.Post.id == id).first()
@@ -60,7 +62,8 @@ def getPost(id: int, db: Session = Depends(get_db)):
 
 
 @router.delete("/{id}", status_code = status.HTTP_204_NO_CONTENT)
-def deletePost(id: int, db: Session = Depends(get_db)):
+def deletePost(id: int, db: Session = Depends(get_db),
+                 userId: int = Depends(oauth2.get_current_user)):
     # cursor.execute(""" DELETE FROM posts WHERE id = %s RETURNING *""",
     #                (str(id)))
     # deletedPost = cursor.fetchone()
@@ -74,7 +77,8 @@ def deletePost(id: int, db: Session = Depends(get_db)):
     
 
 @router.put("/{id}", status_code = status.HTTP_200_OK, response_model = schemas.Post)
-def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db)):
+def updatePost(id: int, post: schemas.CreatePost, db: Session = Depends(get_db),
+                 userId: int = Depends(oauth2.get_current_user)):
     # cursor.execute(""" UPDATE posts SET title  = %s,
     #   content  = %s, published = %s WHERE id = %s RETURNING *""",
     #     (post.title, post.content, post.published, str(id)))
