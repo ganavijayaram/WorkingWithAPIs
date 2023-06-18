@@ -25,7 +25,7 @@ def getPosts(db: Session = Depends(get_db)):
 @router.post("/", status_code=status.HTTP_201_CREATED,
            response_model = schemas.Post)
 def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db),
-                 get_current_user: str = Depends(oauth2.get_current_user)):
+                 userId: int = Depends(oauth2.get_current_user)):
     # cursor.execute(""" INSERT INTO posts (title, content, 
     #                 published) VALUES (%s, %s, %s) RETURNING *""", 
     #                (post.title, post.content, post.published))
@@ -33,6 +33,7 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db),
     # conn.commit()
     #newPost = models.Posts(title = post.title, content = post.content,
                            #published = post.published)
+    print("user id ", userId)
     newPost = models.Post(**post.dict())
     db.add(newPost)
     db.commit()
