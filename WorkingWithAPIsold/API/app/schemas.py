@@ -1,6 +1,7 @@
 #For creating schema for the Post request
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
+from typing import Optional
 
 #Creating schema for the Post request
 class PostBase(BaseModel):
@@ -35,3 +36,10 @@ class UserOut(BaseModel):
 
 class UserLogin(UserCreate):
     pass
+
+class Token(BaseModel):
+    token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: Optional[str] = None
