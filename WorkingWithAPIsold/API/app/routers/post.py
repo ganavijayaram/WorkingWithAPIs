@@ -34,7 +34,7 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db),
     # conn.commit()
     #newPost = models.Posts(title = post.title, content = post.content,
                            #published = post.published)
-    newPost = models.Post(**post.dict())
+    newPost = models.Post(owner_id = currentUser.id, **post.dict())
     db.add(newPost)
     db.commit()
     db.refresh(newPost)
