@@ -32,3 +32,6 @@ class UserOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+class UserLogin(UserCreate):
+    pass

@@ -18,7 +18,7 @@ from .database import engine, get_db
 from sqlalchemy.orm import Session
 
 #importing the routes from routers file
-from .routers import post, user
+from .routers import post, user, auth
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -48,6 +48,7 @@ myPosts = [{"title": "Title 1", "content": " Content 1", "id": 1}, {"title": "Ti
 #Including the routes which are in different files to be refresenced when called
 app.include_router(post.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 #routing/path operations
 
