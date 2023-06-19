@@ -4,20 +4,32 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ..oauth2 import get_current_user
+from sqlalchemy import func
 
 
 router = APIRouter(
     prefix = "/posts", tags = ['Posts']
 )
 
-@router.get("/", response_model = List[schemas.Post])
+@router.get("/")
+#Not working need to check
+#@router.get("/", response_model = List[schemas.PostOut])
 def getPosts(db: Session = Depends(get_db),
                  currentUser: int = Depends(oauth2.get_current_user), limit: int = 10,
                    skip: int = 0, search: Optional[str] = ""):
     #cursor.execute("""SELECT * FROM POSTS""")
     #allPosts = cursor.fetchall()
-    allPosts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
-    return allPosts
+
+    #select posts.id, count(votes.post_id) from posts left join votes
+ #on posts.id = votes.post_id 
+#group by posts.id
+
+
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter = True).group_by(models.Post.id).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+
+    #allPosts = db.query(models.Post).filter(models.Post.title.contains(search)).limit(limit).offset(skip).all()
+    return posts
 
 
 #Here when the client will send data, the data is taken by the API
@@ -45,18 +57,23 @@ def createPosts(post: schemas.CreatePost, db: Session = Depends(get_db),
 
        
 #Giving path parameter
-@router.get("/{id}", response_model = schemas.Post)
+@router.get("/{id}")
+#@router.get("/{id}", response_model = schemas.PostOut)
 #Validation provided by the FastAPI
 def getPost(id: int, db: Session = Depends(get_db), 
                  currentUser: int = Depends(oauth2.get_current_user)):
     # cursor.execute(""" SELECT * FROM posts WHERE id = %s """, (str(id)))
     # singlePost = cursor.fetchone()
     print(currentUser.email)
-    singlePost = db.query(models.Post).filter(models.Post.id == id).first()
-    if not singlePost:
+
+    posts = db.query(models.Post, func.count(models.Vote.post_id).label("votes")).join(
+        models.Vote, models.Post.id == models.Vote.post_id, isouter = True).group_by(
+        models.Post.id).filter(models.Post.id == id).first()
+    #singlePost = db.query(models.Post).filter(models.Post.id == id).first()
+    if not posts:
         raise HTTPException(status.HTTP_404_NOT_FOUND,
          detail = f"The post requested with id {id} does not exist")
-    return singlePost
+    return posts
 
     
 
