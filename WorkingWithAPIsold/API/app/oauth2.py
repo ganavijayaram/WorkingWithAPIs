@@ -4,28 +4,27 @@ from . import schemas, models, database
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from .config import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl = "login")
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 def createToken(data: dict):
     #To create a copy of the data, do you can preserve the actual data
     toEncode = data.copy()
     #Setting the expiration date
-    expire = datetime.utcnow() + timedelta(minutes = ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.utcnow() + timedelta(minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     #Addind the expiration date to the data
     toEncode.update({'exp': expire})
     #Encoding the token 
-    encodedJWT = jwt.encode(toEncode, SECRET_KEY, algorithm = ALGORITHM)
+    encodedJWT = jwt.encode(toEncode, settings.SECRET_KEY, algorithm = settings.ALGORITHM)
     return encodedJWT
 
 #Verifying the token sent by the user in the requests
 def verifyToken(token: str, credentials_exception):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms = [ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms = [settings.ALGORITHM])
         id = payload.get("userId")
         if not id:
             raise credentials_exception
