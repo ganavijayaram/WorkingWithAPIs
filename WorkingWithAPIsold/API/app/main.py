@@ -5,7 +5,6 @@ from .database import engine
 #importing the routes from routers file
 from .routers import post, user, auth, vote
 
-models.Base.metadata.create_all(bind=engine)
 
 #Creating instance of the class FastAPI
 app = FastAPI()
