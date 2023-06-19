@@ -4,10 +4,24 @@ from . import models
 from .database import engine
 #importing the routes from routers file
 from .routers import post, user, auth, vote
+from fastapi.middleware.cors import CORSMiddleware
+
 
 
 #Creating instance of the class FastAPI
 app = FastAPI()
+
+origins = [
+    "https://www.google.com"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 #Including the routes which are in different files to be refresenced when called
 app.include_router(post.router)
