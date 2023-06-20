@@ -1,0 +1,7 @@
+__pycache__
+venv/
+app/__pycache__
+.env
+Docs/
+.DS_Store
+~$I COURSE.docx
