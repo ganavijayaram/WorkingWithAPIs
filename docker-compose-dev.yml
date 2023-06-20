@@ -1,0 +1,48 @@
+#Which version of the docker compose to use
+version:  "3"
+
+#conatiners and their values
+services:
+  api:
+    build: .
+    #This tells before starting the api container, we need the followinf container sto be up and
+    #running
+    depends_on: 
+      - postgres
+    #localhost and container
+    ports:
+      - 8000:8000
+
+    #here if we make any changes on our local machine to the one in the container
+    volumes:
+      - ./:/user/src/app:ro
+    # env_file:
+    #   - ./.env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment: 
+      #we are telling the postgres conatiner is the hostname, 
+      #soit will get resolved to the postgres conatiner below
+      - DATABASE_HOSTNAME=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_PASSWORD=IAMBLESSEDthankyou1!
+      - DATABASE_NAME=WorkingWithFastAPI
+      - DATABASE_USERNAME=postgres
+      - SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+  #This is another container for database
+  postgres:
+    #here we are giving an image, since we dont ahve anything, but for api, we gave a build,
+    # because we had a custom image
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD = password123
+      - POSTGRES_DB = WorkingWithFastAPI
+    #/var--- is where all the data is stored in the conatiner, 
+    #we are suing that locationa nad copying into our local machine so when conatiner is killed, we dont lose the data
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+volumes:
+  postgres-db: 

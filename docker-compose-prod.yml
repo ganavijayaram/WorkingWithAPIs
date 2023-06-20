@@ -1,0 +1,51 @@
+#Which version of the docker compose to use
+version:  "3"
+
+#conatiners and their values
+services:
+  api:
+    # we dont build images in prod we push our image to hub and then pull it using image
+    #build: .
+    #use image: 
+    #This tells before starting the api container, we need the followinf container sto be up and
+    #running
+    depends_on: 
+      - postgres
+    #localhost and container
+    ports:
+      - 80:8000
+
+    #here if we make any changes on our local machine to the one in the container
+    #we will not use binding volumes
+    # volumes:
+    #   - ./:/user/src/app:ro
+    # env_file:
+    #   - ./.env
+    #Not needed since we already have it on the docker file
+    #command: uvicorn app.main:app --host 0.0.0.0 --port 8000 
+    environment: 
+      #we are grabbing all these values from the enviroment variables of the  prod env
+      - DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
+      - DATABASE_PORT= ${DATABASE_PORT}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME={DATABASE_NAME}
+      - DATABASE_USERNAME=${DATABASE_USERNAME}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALGORITHM=${ALGORITHM}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
+
+  #This is another container for database
+  postgres:
+    #here we are giving an image, since we dont ahve anything, but for api, we gave a build,
+    # because we had a custom image
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD = ${DATABASE_PASSWORD}
+      - POSTGRES_DB = {DATABASE_NAME}
+    #/var--- is where all the data is stored in the conatiner, 
+    #we are suing that locationa nad copying into our local machine so when conatiner is killed, we dont lose the data
+    volumes:
+      - postgres-db:/var/lib/postgresql/data
+
+volumes:
+  postgres-db: 
